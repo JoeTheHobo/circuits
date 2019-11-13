@@ -4,6 +4,7 @@ var selectCells = [];
 
 var saves = [];
 
+var copyMap = [];
 var lastCell = [];
 var undoMax = 30;
 var allKeys = [];
@@ -95,7 +96,7 @@ class componant {
     }
     clicked() {
 
-        if (select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== 'space') {
+        if (select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== 'space' && select !== '`') {
             this.reform(select);
             this.different = true;
             this.updateComp();
@@ -118,7 +119,20 @@ class componant {
                 select = select1;
             }
         } else if (select == 'cut') {
-            if (selectCells.length === 2) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 2) {
+                selectCells.push( [this.i,this.j] );
+                let x1 = selectCells[0][1],
+                    x2 = selectCells[1][1],
+                    y1 = selectCells[0][0],
+                    y2 = selectCells[1][0];
+
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    copyMap.push([]);
+                    for (let j = 0; j < x2 - x1 + 1; j++) {
+                        copyMap[i].push( [map[y1 + i][x1 + j].parts.number, map[y1 + i][x1 + j].direction] );
+                    }
+                }
+            }
             if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
             if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
             if (selectCells.length === 3) {
@@ -129,25 +143,40 @@ class componant {
                     x3 = selectCells[2][1],
                     y3 = selectCells[2][0];
 
-                for (let i = 0; i < y2-y1 + 1; i++) {
-                    for (let j = 0; j < x2-x1 + 1; j++) {
-                        select = map[y1 + i][x1 + j].parts.number;
-                        current_direction = map[y1 + i][x1 + j].direction;
-                        map[y3 + i][x3 + j].clicked(); //i - j
-                    }
-                }
-                
                 select = 1;
                 for (let i = 0; i < y2-y1 + 1; i++) {
                     for (let j = 0; j < x2-x1 + 1; j++) {
                         map[y1 + i][x1 + j].clicked(); //i - j
                     }
                 }
+
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        select = copyMap[i][j][0];
+                        current_direction = copyMap[i][j][1];
+                        map[y3 + i][x3 + j].clicked(); //i - j
+                    }
+                }
+                
+                
                 select = select1;
                 current_direction = old_direction;
             }
         } else if (select == 'copy') {
-            if (selectCells.length === 2) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 2) {
+                selectCells.push( [this.i,this.j] )
+                let x1 = selectCells[0][1],
+                    x2 = selectCells[1][1],
+                    y1 = selectCells[0][0],
+                    y2 = selectCells[1][0];
+
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    copyMap.push([]);
+                    for (let j = 0; j < x2 - x1 + 1; j++) {
+                        copyMap[i].push( [map[y1 + i][x1 + j].parts.number, map[y1 + i][x1 + j].direction] );
+                    }
+                }
+            }
             if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
             if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
             if (selectCells.length === 3) {
@@ -157,11 +186,10 @@ class componant {
                     y2 = selectCells[1][0],
                     x3 = selectCells[2][1],
                     y3 = selectCells[2][0];
-                
                 for (let i = 0; i < y2-y1 + 1; i++) {
                     for (let j = 0; j < x2-x1 + 1; j++) {
-                        select = map[y1 + i][x1 + j].parts.number;
-                        current_direction = map[y1 + i][x1 + j].direction;
+                        select = copyMap[i][j][0];
+                        current_direction = copyMap[i][j][1];
                         map[y3 + i][x3 + j].clicked(); //i - j
                     }
                 }
@@ -193,6 +221,8 @@ class componant {
             }
             lastCell = [this.j,this.i];
             
+        } else if (select === '`') {
+            select = this.parts.number;
         }
     }
     updateComp() {
@@ -343,6 +373,7 @@ document.body.addEventListener('keydown',function(e) {
         selectCells = [];
         select1 = select;
         old_direction = current_direction;
+        copyMap = [];
         select = 'copy';
     }
     if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'x') {
@@ -350,6 +381,7 @@ document.body.addEventListener('keydown',function(e) {
         selectCells = [];
         select1 = select;
         old_direction = current_direction;
+        copyMap = [];
         select = 'cut';
     }
     if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'z') {
@@ -365,6 +397,9 @@ document.body.addEventListener('keydown',function(e) {
             select1 = select;
             select = 'space';
         }
+    }
+    if (e.key == '`') {
+        select = '`';
     }
 });
 document.body.addEventListener('keyup',function(e) {
