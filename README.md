@@ -42,6 +42,9 @@ Pressing the alt key is very nice. It allows you to sraw circuits with the mouse
 The Space Key:
 Press one point, then press space. Now press a final point. Between the two points will fill with whatever type is selected.
 
+The '`' Key:
+Press it and then press another cell. Nothing happens. Just kidding, what happened is that now you have selected that cell. So instead of pressing the number you can now just place and it will be what you want!
+
 # Thank you
 If anyone plays around with this I would be super happy. I am a new developer and still is learning a lot to do with JavaScript. If you have any feedback please let me know, I'm trying to learn everything to do with Programming/Computer Science.
 
