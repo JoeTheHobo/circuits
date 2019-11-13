@@ -1,11 +1,23 @@
 var size = 30;
 
+var selectCells = [];
+
+var saves = [];
+
+var lastCell = [];
+var undoMax = 30;
 var allKeys = [];
-var mouseDown = false;
+var mouseMoved = false;
+var mouseDown = false, altDown = false;
 document.body.onmousedown = () => { mouseDown = true }
 document.body.onmouseup = () => { mouseDown = false }
+document.body.addEventListener('keydown',(e) => { if (e.key == 'Alt') { altDown = true } });
+document.body.addEventListener('keyup',(e) => { if (e.key == 'Alt') { altDown = false; mouseMoved = false; } });
+var mouseLast = [];
 
+var select1;
 var select = 1;
+var old_direction;
 var current_direction = 1;
 var map = [];
 
@@ -50,11 +62,138 @@ class componant {
                 j: this.j
             } );
         }
+        lastCell = [this.j,this.i];
+    }
+    saveUndo() {
+        if (saves[saves.length - 1] !== getSave()) saves.push(getSave());
+        if (saves.length > undoMax) saves.shift();
+
+        
+        
+        if (altDown && select !== 1) {
+            let mouse_moved = current_direction;
+            if (mouseLast[0] > this.j) mouse_moved = 2;
+            if (mouseLast[0] < this.j) mouse_moved = 1;
+            if (mouseLast[1] < this.i) mouse_moved = 4;
+            if (mouseLast[1] > this.i) mouse_moved = 3;
+            mouseLast = [this.j,this.i];
+            
+            current_direction = mouse_moved;
+            if (mouseMoved) {
+                if (current_direction == 1) map[this.i][this.j - 1].clicked();
+                if (current_direction == 2) map[this.i][this.j + 1].clicked();
+                if (current_direction == 3) map[this.i + 1][this.j].clicked();
+                if (current_direction == 4) map[this.i - 1][this.j].clicked();
+            }
+
+            mouseMoved = true;
+        }
+
+        
+
+        this.clicked();
     }
     clicked() {
-        this.reform(select);
-        this.different = true;
-        this.updateComp();
+
+        if (select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== 'space') {
+            this.reform(select);
+            this.different = true;
+            this.updateComp();
+        } else if (select == 'delete') {
+            
+            if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 2) {
+                let x1 = selectCells[0][1],
+                    x2 = selectCells[1][1],
+                    y1 = selectCells[0][0],
+                    y2 = selectCells[1][0];
+                
+                select = 1;
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        map[y1 + i][x1 + j].clicked(); //i - j
+                    }
+                }
+                select = select1;
+            }
+        } else if (select == 'cut') {
+            if (selectCells.length === 2) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 3) {
+                let x1 = selectCells[0][1],
+                    x2 = selectCells[1][1],
+                    y1 = selectCells[0][0],
+                    y2 = selectCells[1][0],
+                    x3 = selectCells[2][1],
+                    y3 = selectCells[2][0];
+
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        select = map[y1 + i][x1 + j].parts.number;
+                        current_direction = map[y1 + i][x1 + j].direction;
+                        map[y3 + i][x3 + j].clicked(); //i - j
+                    }
+                }
+                
+                select = 1;
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        map[y1 + i][x1 + j].clicked(); //i - j
+                    }
+                }
+                select = select1;
+                current_direction = old_direction;
+            }
+        } else if (select == 'copy') {
+            if (selectCells.length === 2) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 3) {
+                let x1 = selectCells[0][1],
+                    x2 = selectCells[1][1],
+                    y1 = selectCells[0][0],
+                    y2 = selectCells[1][0],
+                    x3 = selectCells[2][1],
+                    y3 = selectCells[2][0];
+                
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        select = map[y1 + i][x1 + j].parts.number;
+                        current_direction = map[y1 + i][x1 + j].direction;
+                        map[y3 + i][x3 + j].clicked(); //i - j
+                    }
+                }
+                
+                select = 'copy';
+                selectCells = [[y1,x1],[y2,x2]];
+                current_direction = old_direction;
+            }
+        } else if (select === 'space') {
+            select = select1;
+            let x1 = lastCell[0],
+                x2 = this.j,
+                y1 = lastCell[1],
+                y2 = this.i,
+                uy1 = y1,uy2 = y2,ux1 = x1,ux2 = x2;
+            if (y2 < y1) {
+                uy2 = y1;
+                uy1 = y2; 
+            }
+            if (x2 < x1) {
+                ux2 = x1;
+                ux1 = x2; 
+            }
+
+            for (let i = 0; i < uy2-uy1 + 1; i++) {
+                for (let j = 0; j < ux2-ux1 + 1; j++) {
+                    map[uy1 + i][ux1 + j].clicked(); //i - j
+                }
+            }
+            lastCell = [this.j,this.i];
+            
+        }
     }
     updateComp() {
             /*
@@ -168,10 +307,10 @@ let grid = new table(size,size,function(cell,i,j) {
     cell.type = select;
     map[i][j] = new componant(select,i,j);
     cell.onmousedown = function() {
-        map[this.i][this.j].clicked();
+        map[this.i][this.j].saveUndo();
     }
     cell.onmouseover = function() {
-        if (mouseDown) map[this.i][this.j].clicked();
+        if (mouseDown) map[this.i][this.j].saveUndo();
     }
 },$('grid'));
 
@@ -189,6 +328,42 @@ document.body.addEventListener('keydown',function(e) {
             if (map[allKeys[i].i][allKeys[i].j].keyDown == false) map[allKeys[i].i][allKeys[i].j].different = true;
             map[allKeys[i].i][allKeys[i].j].keyDown = true;
             map[allKeys[i].i][allKeys[i].j].updateComp();
+        }
+    }
+
+    if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'd') {
+        e.preventDefault();
+        selectCells = [];
+        select1 = select;
+        old_direction = current_direction;
+        select = 'delete';
+    }
+    if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'c') {
+        e.preventDefault();
+        selectCells = [];
+        select1 = select;
+        old_direction = current_direction;
+        select = 'copy';
+    }
+    if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'x') {
+        e.preventDefault();
+        selectCells = [];
+        select1 = select;
+        old_direction = current_direction;
+        select = 'cut';
+    }
+    if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.key == 'z') {
+        e.preventDefault();
+        
+        if (saves.length > 0) {
+            loadMap(saves[saves.length - 1]);
+            saves.pop();
+        }
+    }
+    if (e.key == ' ') {
+        if (lastCell) {
+            select1 = select;
+            select = 'space';
         }
     }
 });
@@ -219,17 +394,22 @@ document.addEventListener("keydown", function(e) {
     }
 }, false);
 
-function saveMap() {
+function getSave() {
     var txt = '';
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
             txt += map[i][j].parts.number + ',' + map[i][j].direction + ',';
         }
     }
+    return txt.slice(0,txt.length - 1);
+}
+
+function saveMap() {
+    txt = getSave();
     let myWindow = window.open();
     myWindow.document.write(`
         <head><title>Save Progress</title></head>
-        <p id='hey' style="word-wrap: break-word;">${txt.slice(0,txt.length - 1)}</p>
+        <p id='hey' style="word-wrap: break-word;">${txt}</p>
         <script>
             function selectText(node) {
                 node = document.getElementById(node);
@@ -252,8 +432,11 @@ function saveMap() {
         </script>
     `);
 }
-function loadMap() {
-    let newMap = prompt('Paste in your map:').split(',');
+function loadMap(exe) {
+    let newMap;
+    if (exe) newMap = exe.split(',');
+    else newMap = prompt('Paste in your map:').split(',');
+
     let useMap = [];
     let char = 0;
     for (let i = 0; i < size; i++) {
@@ -288,10 +471,10 @@ function loadMap() {
         map[i][j].reform(useMap[i][j][0]);
         current_direction = oldInfo;
         cell.onmousedown = function() {
-            map[this.i][this.j].clicked();
+            map[this.i][this.j].saveUndo();
         }
         cell.onmouseover = function() {
-            if (mouseDown) map[this.i][this.j].clicked();
+            if (mouseDown) map[this.i][this.j].saveUndo();
         }
     },$('grid'));
 
