@@ -9,6 +9,7 @@ parts.push( {//DEAD
     power_need: 1,
     on_power: false,
     key: false,
+    name: 'Dead',
 });
 parts.push( {//Power
     number: 2,
@@ -19,6 +20,7 @@ parts.push( {//Power
     power_need: 1,
     on_power: false,
     key: false,
+    name: 'Power',
 });
 parts.push( {//Line
     number: 3,
@@ -32,58 +34,7 @@ parts.push( {//Line
         power: true,
     },
     key: false,
-});
-parts.push( {//LIGHT
-    number: 8,
-    text: false,
-    color: 'black',
-    power_type: false,
-    power: false,
-    power_need: 1,
-    on_power: {
-        color: 'yellow',
-        power: false,
-    },
-    key: false,
-});
-parts.push( {//AND
-    number: 5,
-    text: 'direction',
-    color: 'darkblue',
-    power_type: 'direction',
-    power: false,
-    power_need: 2,
-    on_power: {
-        power: true,
-        color: 'darkgreen',
-    },
-    key: false,
-});
-parts.push( {//reverse
-    number: 6,
-    text: 'direction',
-    color: 'white',
-    power_type: 'direction',
-    power: true,
-    power_need: 1,
-    on_power: {
-        power: false,
-        color: 'lightgray',
-    },
-    key: false,
-});
-parts.push( {//sensitive
-    number: 7,
-    text: 'direction',
-    color: 'pink',
-    power_type: 'all',
-    power: false,
-    power_need: 1,
-    on_power: {
-        power: true,
-        color: 'red',
-    },
-    key: false,
+    name: 'Power Line',
 });
 parts.push( {
     number: 4,
@@ -97,7 +48,66 @@ parts.push( {
         power: true,
     },
     key: false,
+    name: 'Jump',
 });
+parts.push( {//AND
+    number: 5,
+    text: 'direction',
+    color: 'darkblue',
+    power_type: 'direction',
+    power: false,
+    power_need: 2,
+    on_power: {
+        power: true,
+        color: 'darkgreen',
+    },
+    key: false,
+    name: 'And Gate',
+});
+parts.push( {//reverse
+    number: 6,
+    text: 'direction',
+    color: 'white',
+    power_type: 'direction',
+    power: true,
+    power_need: 1,
+    on_power: {
+        power: false,
+        color: 'lightgray',
+    },
+    key: false,
+    name: 'Reverse',
+});
+parts.push( {//sensitive
+    number: 7,
+    text: 'direction',
+    color: 'pink',
+    power_type: 'all',
+    power: false,
+    power_need: 1,
+    on_power: {
+        power: true,
+        color: 'red',
+    },
+    key: false,
+    name: 'Sensitive',
+});
+
+parts.push( {//LIGHT
+    number: 8,
+    text: false,
+    color: 'black',
+    power_type: false,
+    power: false,
+    power_need: 1,
+    on_power: {
+        color: 'yellow',
+        power: false,
+    },
+    key: false,
+    name: 'Light',
+});
+
 parts.push( {
     number: 'A', //Number to press
     text: 'key', //[key,direction,false] - key: 'states which key to press' direction: 'Shows arrow of power' false: Shows no text
