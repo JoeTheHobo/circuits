@@ -1,12 +1,160 @@
-body {
+html, body {
     -webkit-user-select: none;
-    background: rgb(2,0,36);
-    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(56,21,143,1) 32%, rgba(0,212,255,1) 100%);
+    background: rgb(11,10,14);
+    height: 100%;
+    margin: 0px;
+    user-select: none;
+    font-family: Arial, Helvetica, sans-serif;
 }
 #grid {
     background: #111;
     text-align: center;
     font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
-    
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+.leftBar2 {
+    height: 100%;
+    width: 100px;
+    background: #333;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    position: fixed;
+    left: 400px;
+}
+.sideTableCell {
+    margin-left: 8px;
+    text-align: center;
+    color: #111;
+    font-size: 18px;
+    font-weight: bold;
+    width: 80px;
+    height: 80px;
+    display: inline-block;
+    cursor: pointer;
+    border: 2px solid black;
+}
+.leftBar {
+    height: 100%;
+    width: 400px;
+    background: #222;
+    font-size: 40px;
+    text-align: center;
+    position: fixed;
+}
+.bar {
+    width: 100%;
+    border-bottom: 2px solid black;
+    background: #666;
+    cursor: pointer;
+    height: 50px;
+}
+.popUp {
+    display: none;
+    position: fixed;
+    width: 400px;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background: #666668;
+    border: 2px solid black;
+    border-radius: 3px;
+    z-index: 999;
+}
+#out {
+    width: 45px;
+    height: 45px;
+    background: rgb(182, 0, 0);
+    font-size: 43px;
+    font-weight: bold;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+    border-bottom-left-radius: 5px;
+    text-align: center;
+    position: absolute;
+    right: 0px;
+    cursor: pointer;
+}
+.tableChild {
+    background: lightgreen;
+    border: 2px solid black;
+    border-radius: 2px;
+    height: 20px;
+    cursor: pointer;
+    padding: 5px;
+}
+.saverOut {
+    background: lightcoral;
+    border: 2px solid black;
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 5px;
+}
+.saverGet {
+    background: lightseagreen;
+    border: 2px solid black;
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+#list {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-collapse: collapse; 
+}
+tr { 
+    border-top: 1px solid #000;
+    background: #777;
+}
+tr:first-child { 
+    border-top: none;
+    background: none;
+}
+
+.showOff2 {
+    height: 50px;
+    width: 350px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    background: lightskyblue;
+    border: 3px solid black;
+    border-top-right-radius: 8px;
+}
+#so_name {
+    position: absolute;
+    top: 0px;
+    font-size: 22px;
+    width: 200px;
+    left: calc(50% - 100px);
+}
+#so_cube {
+    height: 100px;
+    width: 100px;
+    text-align: center;
+    line-height: 100px;
+    margin: 25px;
+}
+#so_cube2 {
+    height: 50px;
+    width: 350px;
+    text-align: center;
+    background: lightskyblue;
+    font-size: 30px;
+    line-height: 50px;
+}
+.showOff {
+    height: 150px;
+    width: 150px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    background: lightskyblue;
+    border: 3px solid black;
+    border-top-right-radius: 8px;
 }
