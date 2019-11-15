@@ -112,20 +112,11 @@ class componant {
                     y1 = selectCells[0][0],
                     y2 = selectCells[1][0];
                 
-                let uy2, uy1, ux2, ux1;
-                if (y2 < y1) {
-                    uy2 = y1;
-                    uy1 = y2; 
-                }
-                if (x2 < x1) {
-                    ux2 = x1;
-                    ux1 = x2; 
-                }
 
                 select = 1;
-                for (let i = 0; i < uy2-uy1 + 1; i++) {
-                    for (let j = 0; j < ux2-ux1 + 1; j++) {
-                        map[uy1 + i][ux1 + j].clicked(); //i - j
+                for (let i = 0; i < y2-y1 + 1; i++) {
+                    for (let j = 0; j < x2-x1 + 1; j++) {
+                        map[y1 + i][x1 + j].clicked(); //i - j
                     }
                 }
                 select = select1;
