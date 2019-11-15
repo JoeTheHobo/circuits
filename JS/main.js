@@ -1,9 +1,10 @@
-var size = 30;
+var size = 34;
 
 var selectCells = [];
 
 var saves = [];
 
+var len1, len2;
 var copyMap = [];
 var lastCell = [];
 var undoMax = 30;
@@ -18,6 +19,7 @@ var mouseLast = [];
 
 var select1;
 var select = 1;
+updateSelectedEle();
 var old_direction;
 var current_direction = 1;
 var map = [];
@@ -96,7 +98,7 @@ class componant {
     }
     clicked() {
 
-        if (select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== 'space' && select !== '`') {
+        if (select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== 'space' && select !== '`' && select !== '>' && select !== '<') {
             this.reform(select);
             this.different = true;
             this.updateComp();
@@ -110,10 +112,20 @@ class componant {
                     y1 = selectCells[0][0],
                     y2 = selectCells[1][0];
                 
+                let uy2, uy1, ux2, ux1;
+                if (y2 < y1) {
+                    uy2 = y1;
+                    uy1 = y2; 
+                }
+                if (x2 < x1) {
+                    ux2 = x1;
+                    ux1 = x2; 
+                }
+
                 select = 1;
-                for (let i = 0; i < y2-y1 + 1; i++) {
-                    for (let j = 0; j < x2-x1 + 1; j++) {
-                        map[y1 + i][x1 + j].clicked(); //i - j
+                for (let i = 0; i < uy2-uy1 + 1; i++) {
+                    for (let j = 0; j < ux2-ux1 + 1; j++) {
+                        map[uy1 + i][ux1 + j].clicked(); //i - j
                     }
                 }
                 select = select1;
@@ -223,7 +235,57 @@ class componant {
             
         } else if (select === '`') {
             select = this.parts.number;
+        } else if (select === '>') {
+            if (selectCells.length === 1) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 0) selectCells.push( [this.i,this.j] );
+            if (selectCells.length === 2) {
+                let a = setInterval(function() {
+                    if (mouseDown == false) {
+                        let x1 = selectCells[0][1],
+                            x2 = selectCells[1][1],
+                            y1 = selectCells[0][0],
+                            y2 = selectCells[1][0];
+                        
+                        for (let i = 0; i < y2-y1 + 1; i++) {
+                            copyMap.push([]);
+                            for (let j = 0; j < x2 - x1 + 1; j++) {
+                                copyMap[i].push( [map[y1 + i][x1 + j].parts.number, map[y1 + i][x1 + j].direction] );
+                            }
+                        }
+                        let txt = copyMap.toString();
+                        txt = (y2-y1+1) + ',' + (x2-x1+1) + ',' + txt;
+
+                        let old = getArr('modules',[]);
+                        
+                        select = select1;
+                        updateSelectedEle();
+                        let ab = prompt('Name the Module');
+                        if (ab) {
+                            old.push(ab + ',' + txt)
+                            saveArr(old,'modules');
+                        }
+                        mouseDown = false;
+                        //
+                        clearInterval(a);
+                    }
+                },0);
+            }
+        } else if (select === '<') {
+            let posY = this.i;
+            let posX = this.j;
+
+            for (let i = 0; i <  len1; i++) {
+                for (let j = 0; j < len2; j++) {
+                    select = copyMap[i][j][0];
+                    current_direction = copyMap[i][j][1];
+                    map[posY + i][posX + j].clicked(); //i - j
+                }
+            }
+
+            select = '<';
         }
+
+        updateSelectedEle();
     }
     updateComp() {
             /*
@@ -388,7 +450,7 @@ document.body.addEventListener('keydown',function(e) {
         e.preventDefault();
         
         if (saves.length > 0) {
-            loadMap(saves[saves.length - 1]);
+            loadMap('load' + ',' + saves[saves.length - 1]);
             saves.pop();
         }
     }
@@ -401,6 +463,34 @@ document.body.addEventListener('keydown',function(e) {
     if (e.key == '`') {
         select = '`';
     }
+    if (e.key == '>') {
+        selectCells = [];
+        select1 = select;
+        copyMap = [];
+        select = '>';
+    }
+    if (e.key == '<') {
+        let myTxt = prompt('Enter your module');
+        if (myTxt) {
+            let arr = myTxt.split(',');
+            len1 = arr[0];
+            len2 = arr[1];
+            arr.shift();
+            arr.shift();
+            copyMap = [];
+            let char = 0;
+            for (let i = 0; i < len1; i++) {
+                copyMap.push( [] );
+                for (let j = 0; j < len2; j++) {
+                    copyMap[i].push([arr[char],arr[char + 1]]);
+                    char += 2;
+                }
+            }
+
+            select = '<';
+        }
+    }
+    updateSelectedEle();
 });
 document.body.addEventListener('keyup',function(e) {
     for (let i = 0; i < allKeys.length; i++) {
@@ -441,31 +531,9 @@ function getSave() {
 
 function saveMap() {
     txt = getSave();
-    let myWindow = window.open();
-    myWindow.document.write(`
-        <head><title>Save Progress</title></head>
-        <p id='hey' style="word-wrap: break-word;">${txt}</p>
-        <script>
-            function selectText(node) {
-                node = document.getElementById(node);
-           
-                if (document.body.createTextRange) {
-                    const range = document.body.createTextRange();
-                    range.moveToElementText(node);
-                    range.select();
-                } else if (window.getSelection) {
-                    const selection = window.getSelection();
-                    const range = document.createRange();
-                    range.selectNodeContents(node);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                } else {
-                    console.warn("Could not select text in node: Unsupported browser.");
-                }
-            }
-            selectText('hey');
-        </script>
-    `);
+    let old = getArr('saves',[]);
+    old.push(prompt('Name the Save') + ',' + txt)
+    saveArr(old,'saves');
 }
 function loadMap(exe) {
     let newMap;
@@ -473,7 +541,7 @@ function loadMap(exe) {
     else newMap = prompt('Paste in your map:').split(',');
 
     let useMap = [];
-    let char = 0;
+    let char = 1;
     for (let i = 0; i < size; i++) {
         useMap.push([]);
         for (let j = 0; j < size; j++) {
@@ -481,7 +549,9 @@ function loadMap(exe) {
             char += 2;
         }
     }
-
+    //For when I add a title
+    let title = newMap[0];
+     
     map = [];
     for (let i = 0; i < size; i++) {
         map.push( [] );
@@ -526,3 +596,484 @@ window.addEventListener("keydown", function(e) {
         e.preventDefault();
     }
 }, false);
+
+
+function openPU(str) {
+    hidePU();
+    let row, cell;
+    switch(str) {
+        case 'save':
+            $('list').innerHTML = '';
+            $('savesPU').show();
+            let myArr = getArr('saves','');
+            for (let i = 0; i < myArr.length; i++) {
+                if (myArr[i] !== '') {
+                    let row = $('list').insertRow(0);
+                    let cell;
+                    let useArr = myArr[i].split(',');
+                    let useName = useArr[0];
+                    let usePaste = useArr;
+
+                    cell = row.insertCell(0);
+                    cell.CLASS('saverGet').ID(useName).html('Get Code').onclick = function() {
+                        let a = getArr('saves');
+                        for (let i = 0; i < a.length; i++) {
+                            let b = a[i].split(',')[0];
+                            if (b == this.id) {
+                                toCut = i;
+                            }
+
+                        }
+                        let txt = a[i].toString();
+                        let myWindow = window.open();
+                        myWindow.document.write(`
+                            <head><title>Save Progress</title></head>
+                            <p id='hey' style="word-wrap: break-word;">${txt}</p>
+                            <script>
+                                function selectText(node) {
+                                    node = document.getElementById(node);
+                            
+                                    if (document.body.createTextRange) {
+                                        const range = document.body.createTextRange();
+                                        range.moveToElementText(node);
+                                        range.select();
+                                    } else if (window.getSelection) {
+                                        const selection = window.getSelection();
+                                        const range = document.createRange();
+                                        range.selectNodeContents(node);
+                                        selection.removeAllRanges();
+                                        selection.addRange(range);
+                                    } else {
+                                        console.warn("Could not select text in node: Unsupported browser.");
+                                    }
+                                }
+                                selectText('hey');
+                            </script>
+                        `);
+                        saveArr(a,'saves');
+                        hidePU();
+                    }
+
+                    cell = row.insertCell(0);
+                    let toCut = false;
+                    cell.CLASS('saverOut').ID(useName).html('Delete').onclick = function() {
+                        let a = getArr('saves');
+                        for (let i = 0; i < a.length; i++) {
+                            let b = a[i].split(',')[0];
+                            if (b == this.id) {
+                                toCut = i;
+                            }
+
+                        }
+                        
+                        a.splice(toCut,1);
+                        saveArr(a,'saves');
+                        hidePU();
+                        openPU('save');
+                    }
+                    cell = row.insertCell(0);
+
+                    cell.ID('saver' + usePaste).CLASS('tableChild').html(useName).onclick = function() {
+                        let a = this.id.letters(5,this.id.length - 1);
+                        loadMap(a);
+                        hidePU();
+                    };
+                }
+            }
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            
+            cell.innerHTML = 'Saves:';
+            cell.style.fontWeight = 'bold';
+            cell.style.fontSize = '25px';
+            cell.style.lineHeight = '50px';
+            break;
+        case 'module':
+                $('list').innerHTML = '';
+                $('savesPU').show();
+                let myArr2 = getArr('modules','');
+                for (let i = 0; i < myArr2.length; i++) {
+                    if (myArr2[i] !== '') {
+                        let row = $('list').insertRow(0);
+                        let cell;
+                        let useArr = myArr2[i].split(',');
+                        let useName = useArr[0];
+                        let usePaste = useArr;
+
+                        cell = row.insertCell(0);
+                        cell.CLASS('saverGet').ID(useName).html('Get Code').onclick = function() {
+                            let a = getArr('modules');
+                            for (let i = 0; i < a.length; i++) {
+                                let b = a[i].split(',')[0];
+                                if (b == this.id) {
+                                    toCut = i;
+                                }
+
+                            }
+                            let txt = a[i].toString();
+                            let myWindow = window.open();
+                            myWindow.document.write(`
+                                <head><title>New Module</title></head>
+                                <p id='hey' style="word-wrap: break-word;">${txt}</p>
+                                <script>
+                                    function selectText(node) {
+                                        node = document.getElementById(node);
+                                
+                                        if (document.body.createTextRange) {
+                                            const range = document.body.createTextRange();
+                                            range.moveToElementText(node);
+                                            range.select();
+                                        } else if (window.getSelection) {
+                                            const selection = window.getSelection();
+                                            const range = document.createRange();
+                                            range.selectNodeContents(node);
+                                            selection.removeAllRanges();
+                                            selection.addRange(range);
+                                        } else {
+                                            console.warn("Could not select text in node: Unsupported browser.");
+                                        }
+                                    }
+                                    selectText('hey');
+                                </script>
+                            `);
+                            saveArr(a,'modules');
+                            hidePU();
+                        }
+
+                        cell = row.insertCell(0);
+                        let toCut = false;
+                        cell.CLASS('saverOut').ID(useName).html('Delete').onclick = function() {
+                            let a = getArr('modules');
+                            for (let i = 0; i < a.length; i++) {
+                                let b = a[i].split(',')[0];
+                                if (b == this.id) {
+                                    toCut = i;
+                                }
+
+                            }
+                            
+                            a.splice(toCut,1);
+                            saveArr(a,'modules');
+                            hidePU();
+                            openPU('module');
+                        }
+                        cell = row.insertCell(0);
+
+                        cell.ID('saver' + usePaste).CLASS('tableChild').html(useName).onclick = function() {
+                            let a = this.id.letters(5,this.id.length - 1);
+                            let arr = a.split(',');
+                            len1 = arr[1];
+                            len2 = arr[2];
+                            arr.shift();
+                            arr.shift();
+                            arr.shift();
+                            copyMap = [];
+                            let char = 0;
+                            for (let i = 0; i < len1; i++) {
+                                copyMap.push( [] );
+                                for (let j = 0; j < len2; j++) {
+                                    copyMap[i].push([arr[char],arr[char + 1]]);
+                                    char += 2;
+                                }
+                            }
+                
+                            select = '<';
+                            
+                            updateSelectedEle();
+                            hidePU();
+                        };
+                    }
+                    
+                }
+
+                row = $('list').insertRow(0);
+                cell = row.insertCell(0);
+                
+                cell.innerHTML = 'Modules:';
+                cell.style.fontWeight = 'bold';
+                cell.style.fontSize = '25px';
+                cell.style.lineHeight = '50px';
+                break;
+        case 'shortcuts':
+            $('list').innerHTML = '';
+            $('savesPU').show();
+
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Have a saved text module? Load it here!';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Shift-< (Load Module)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Select two points to save as a module for future use!';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Shift-> (Save Module)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Have a saved text file? Paste it here!';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-V (Load File)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Save and name your file for later :)';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-S (Save)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Before pressing space click on one cell, then press space and select another cell. Everything and between will turn into that cell.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Space Bar (Fill)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = "Hold down Alt and drag with the mouse over cells. No need to switch direction, it will do it itself";
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Alt (Auto-Direction)' 
+            cell.style.fontWeight = 'bold';
+
+            ////////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Made a mistake? Just undo it.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-Z (Undo)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Click on two places in the grid to delete those cells.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-D (Delete)' 
+            cell.style.fontWeight = 'bold';
+
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Click on two places in the grid to cut the selected cells. Then place wherever to place the cut.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-X (Cut)' 
+            cell.style.fontWeight = 'bold';
+
+            ////////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Click on two places in the grid to copy the selected cells. Then place wherever to place the copy.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Control-C (Copy)' 
+            cell.style.fontWeight = 'bold';
+            
+            ////////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+
+            cell.innerHTML = 'Shortcuts:';
+            cell.style.fontWeight = 'bold';
+            cell.style.fontSize = '25px';
+            cell.style.lineHeight = '50px';
+
+            break;
+        case 'controls':
+            $('list').innerHTML = '';
+            $('savesPU').show();
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Press on a cell in the grid to switch it to the selected cell.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Click (-_-)' 
+            cell.style.fontWeight = 'bold';
+                
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Press shift and then any letter to select that button. When you press that key that button will power on.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Shift-Letter (Select+)' 
+            cell.style.fontWeight = 'bold';
+                
+            ///////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Use the number keys to select different cell types.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Numbers (Select)' 
+            cell.style.fontWeight = 'bold';
+                
+            ///////
+            
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Use the keys to swtich the direction of the selected cell.';
+
+            cell = row.insertCell(0);
+            cell.innerHTML = 'Arrow Keys (Direction)' 
+            cell.style.fontWeight = 'bold';
+                
+            ///////
+
+            row = $('list').insertRow(0);
+            cell = row.insertCell(0);
+            
+            cell.innerHTML = 'Controls:';
+            cell.style.fontWeight = 'bold';
+            cell.style.fontSize = '25px';
+            cell.style.lineHeight = '50px';
+            break;
+    }
+}
+function hidePU() {
+    $('savesPU').hide();
+}
+
+function updateSelectedEle() {
+    let ele = $('so_cube');
+    $('so_name').innerHTML = '';
+    if (!ele) ele = $('so_cube2');
+    if (select !== '<' && select !== 'delete' && select !== 'copy' && select !== 'cut' && select !== '>') {
+        let a = findType(select);
+        ele.style.background = a.color;
+        ele.innerHTML = '';
+        ele.id = 'so_cube';
+        $('so_name').innerHTML = a.name;
+        $('selectedCell').className = 'showOff';
+        if (a.text == 'direction') {
+            if (current_direction == 1) ele.innerHTML = '>';
+            if (current_direction == 2) ele.innerHTML = '<';
+            if (current_direction == 3) ele.innerHTML = '^';
+            if (current_direction == 4) ele.innerHTML = 'v';
+        } else if (a.text == 'key' ) {
+            $('so_name').innerHTML = a.key.key + ' key';
+            if (current_direction == 1) ele.innerHTML = a.key.key + '>';
+            if (current_direction == 2) ele.innerHTML = a.key.key + '<';
+            if (current_direction == 3) ele.innerHTML = a.key.key + '^';
+            if (current_direction == 4) ele.innerHTML = a.key.key + 'v';
+            
+        }
+    } else if (select == '<') {
+        ele.innerHTML = 'Module';
+        $('selectedCell').className = 'showOff2';
+        ele.style.background = 'lightskyblue';
+        ele.id = 'so_cube2';
+    } else if (select == 'delete') {
+        if (selectCells.length == 0) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'DELETE: Select Point A';
+        }
+        if (selectCells.length == 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'DELETE: Select Point B';
+        }
+    } else if (select == 'copy') {
+        if (selectCells.length == 0) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'COPY: Select Point A';
+        }
+        if (selectCells.length == 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'COPY: Select Point B';
+        }
+        if (selectCells.length > 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'COPY: Place down copy';
+        }
+    } else if (select == 'cut') {
+        if (selectCells.length == 0) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'CUT: Select Point A';
+        }
+        if (selectCells.length == 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'CUT: Select Point B';
+        }
+        if (selectCells.length > 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'CUT: Place down cut';
+        }
+    } else if (select == '>') {
+        if (selectCells.length == 0) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'SAVE MODULE: Point A';
+        }
+        if (selectCells.length == 1) {
+            $('selectedCell').className = 'showOff2';
+            ele.id = 'so_cube2';
+            ele.style.background = 'lightskyblue';
+            ele.innerHTML = 'SAVE MODULE: Point B';
+        }
+    }
+}
+
+let side_table = $('.leftBar2');
+for (let i = 0; i < parts.length; i++) {
+    let a = findType(i);
+    if (a) {
+        let cell = side_table.create('div');
+        cell.className = 'sideTableCell';
+        cell.style.background = a.color;
+        cell.id = 'selector' + i;
+        cell.innerHTML = a.name;
+        cell.onclick = function() {
+            select = this.id.letters(8,this.id.length);
+            updateSelectedEle();
+        }
+    }
+}
