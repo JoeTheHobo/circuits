@@ -2,13 +2,35 @@
 <html>
 <head>
 	<title>Circuit Expirement</title>
-	<link rel="stylesheet" type="text/css" media="screen" href="css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="CSS/main.css" />
 	
 </head>
 <body ondragstart="return false;" ondrop="return false;">
-	<center>
-		<table id='grid'></table>
-	</center>
+	<div class='leftBar'>
+		<div class='bar' onclick='openPU("save")'>
+			Saves
+		</div>
+		<div class='bar' onclick='openPU("module")'>
+			Modules
+		</div>
+		<div class='bar' onclick='openPU("controls")'>
+			Controls
+		</div>
+		<div class='bar' onclick='openPU("shortcuts")'>
+			Shortcuts
+		</div>
+
+		<div class='showOff' id='selectedCell'>
+			<div id='so_cube'></div>
+			<div id='so_name'></div>
+		</div>
+	</div>
+	<div class='leftBar2'></div>
+	<table id='grid'></table>
+	<div class='popUp' id='savesPU'>
+		<div id='out' onclick='hidePU()'>X</div>
+		<table id='list'></table>
+	</div>
 	<script src="JS/simple.js"></script>
 	<script src="JS/prefs.js"></script>
 	<script src='JS/keys.js'></script>
