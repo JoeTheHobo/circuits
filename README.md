@@ -1,5 +1,7 @@
-# Circuits V1
-A cool little program that allows you to play with circuits. Though they are not normal circuits, or else you might as well you any other program. I hope you have fun, send any cool projects you made to johnjonesma@gmail.com
+# Circuits V2
+A cool little program that allows you to play with circuits. Though they are not normal circuits, or else you might as well you any other program. I hope you have fun, send any cool projects you made to johnjonesma@gmail.com.
+
+The Program includes in game instructions just in case you need help understanding the game.
 
 # What to do?
 Load up the main.html file and you'll see a 30x30 grid ontop of a gradient background.
