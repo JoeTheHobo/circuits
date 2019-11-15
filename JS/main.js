@@ -289,7 +289,6 @@ class componant {
             let powered = 0;
             let all = [[0,1,1,2,0,2],[0,-1,2,1,0,-2],[-1,0,3,4,-2,0],[1,0,4,3,2,0]];//[i,j,location,direction]
             for (let i = 0; i < all.length; i++) {
-                if (this.j < size - 1 && this.j > 0 && this.i > 0 && this.i < size - 1) {
                     //POWER TYPES
                     if (this.parts.power_type == 'all') {
                         all[i][3] = map[this.i + all[i][0]][this.j + all[i][1]].direction;
@@ -338,7 +337,6 @@ class componant {
                             }
                         }
                     }  
-                }
             }
            
            
@@ -358,15 +356,15 @@ class componant {
 
             if (this.different) {
                 this.different = false;
-                if ($('i' + (this.i - 1) + 'j' + (this.j))) map[this.i - 1][this.j].updateComp();
-                if ($('i' + (this.i + 1) + 'j' + (this.j))) map[this.i + 1][this.j].updateComp();
-                if ($('i' + (this.i) + 'j' + (this.j - 1))) map[this.i][this.j - 1].updateComp();
-                if ($('i' + (this.i) + 'j' + (this.j + 1))) map[this.i][this.j + 1].updateComp();
+                if (map[this.i - 1][this.j]) map[this.i - 1][this.j].updateComp();
+                if (map[this.i + 1][this.j]) map[this.i + 1][this.j].updateComp();
+                if (map[this.i - 0][this.j - 1]) map[this.i][this.j - 1].updateComp();
+                if (map[this.i - 0][this.j + 1]) map[this.i][this.j + 1].updateComp();
 
-                if ($('i' + (this.i - 2) + 'j' + (this.j))) map[this.i - 2][this.j].updateComp();
-                if ($('i' + (this.i + 2) + 'j' + (this.j))) map[this.i + 2][this.j].updateComp();
-                if ($('i' + (this.i) + 'j' + (this.j - 2))) map[this.i][this.j - 2].updateComp();
-                if ($('i' + (this.i) + 'j' + (this.j + 2))) map[this.i][this.j + 2].updateComp();
+                if (map[this.i - 2][this.j]) map[this.i - 2][this.j].updateComp();
+                if (map[this.i + 2][this.j]) map[this.i + 2][this.j].updateComp();
+                if (map[this.i - 0][this.j - 2]) map[this.i][this.j - 2].updateComp();
+                if (map[this.i - 0][this.j + 2]) map[this.i][this.j + 2].updateComp();
             }
     }
 }
